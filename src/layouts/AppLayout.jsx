@@ -41,16 +41,30 @@ export default function AppLayout() {
   return (
     <div className="flex flex-col h-screen bg-zinc-950">
       
-      {/* Header */}
+      {/* Premium Header */}
       <header className="border-b border-zinc-800 bg-zinc-900 p-4 flex justify-between items-center z-10 relative shrink-0">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="hidden md:flex p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors"
           >
             <Menu size={20} />
           </button>
-          <h1 className="text-xl font-bold text-red-500 tracking-tight">CardiBuddy</h1>
+          
+          {/* NEW BRANDING: Logo + Gradient Text */}
+          <div className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-[1.02]">
+            <svg className="w-8 h-8 sm:w-9 sm:h-9 shadow-lg shadow-red-500/10 rounded-xl" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="400" rx="90" fill="#09090B"/>
+              <path d="M 120,320 L 180,90 L 260,200 Z" fill="#DC2626" />
+              <path d="M 120,320 L 260,200 L 290,310 Z" fill="#991B1B" />
+              <path d="M 260,200 L 350,220 L 280,260 Z" fill="#F59E0B" />
+              <circle cx="215" cy="180" r="14" fill="#09090B" />
+              <circle cx="218" cy="177" r="4" fill="#FFFFFF" />
+            </svg>
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-400">
+              CardiBuddy
+            </h1>
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
@@ -64,11 +78,11 @@ export default function AppLayout() {
             <GithubIcon />
           </a>
 
-          <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest hidden sm:inline">Planning:</span>
+          <span className="text-[10px] sm:text-sm font-bold text-zinc-500 uppercase tracking-widest hidden sm:inline">Planning:</span>
           <select 
             value={selectedWeek} 
             onChange={(e) => setSelectedWeek(Number(e.target.value))}
-            className="bg-zinc-950 text-zinc-100 text-sm font-bold border border-zinc-800 rounded-md px-3 py-1.5 outline-none focus:border-red-500 transition-colors shadow-sm"
+            className="bg-zinc-950 text-zinc-100 text-xs sm:text-sm font-bold border border-zinc-800 rounded-md px-2 sm:px-3 py-1.5 outline-none focus:border-red-500 transition-colors shadow-sm cursor-pointer"
           >
             {[...Array(termConfig.totalWeeks)].map((_, i) => (
               <option key={i + 1} value={i + 1}>Week {i + 1}</option>

@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useTracker } from "../context/TrackerContext";
-import { LayoutGrid, List, Plus, ClipboardPaste, Clock, MapPin, Monitor, CalendarSync, ChevronRight, Shrink, Expand, Maximize } from "lucide-react";import AddClassModal from "../components/AddClassModal";
+import { LayoutGrid, List, Plus, ClipboardPaste, Clock, MapPin, Monitor, CalendarSync, ChevronRight, Shrink, Expand, Maximize } from "lucide-react";
+import AddClassModal from "../components/AddClassModal";
 import ClassDetailsModal from "../components/ClassDetailsModal"; 
 import ImportScheduleModal from "../components/ImportScheduleModal";
 import ScheduleOverviewModal from "../components/ScheduleOverviewModal";
-
-
-
 
 export default function Schedule() {
   const { classes } = useTracker();
@@ -44,9 +42,10 @@ export default function Schedule() {
           <p className="text-sm font-medium text-zinc-400 mt-1">Manage your weekly timetable</p>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        {/* MOBILE FIX: Allow horizontal scrolling for buttons if screen is extremely narrow */}
+        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 custom-scrollbar">
           
-          <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+          <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800 shrink-0">
             <button onClick={() => setViewMode("grid")} className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"}`}><LayoutGrid size={18} /></button>
             <button onClick={() => setViewMode("stack")} className={`p-2 rounded-md transition-all ${viewMode === "stack" ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"}`}><List size={18} /></button>
           </div>
@@ -54,41 +53,38 @@ export default function Schedule() {
           {viewMode === "grid" && (
             <button 
               onClick={() => setIsCompact(!isCompact)}
-              className="flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 p-2.5 rounded-lg transition-colors border border-zinc-800 hidden sm:flex"
+              className="flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 p-2.5 rounded-lg transition-colors border border-zinc-800 shrink-0"
               title={isCompact ? "Switch to Comfortable View" : "Switch to Compact View"}
             >
               {isCompact ? <Expand size={16} /> : <Shrink size={16} />}
             </button>
           )}
 
+          {/* MOBILE FIX: Removed hidden classes. Text hides on small screens, icon stays. */}
           <button 
             onClick={() => setActiveModal("import")}
-            className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors border border-zinc-700 hidden md:flex"
+            className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white p-2.5 sm:px-4 sm:py-2 rounded-lg font-bold text-sm transition-colors border border-zinc-700 shrink-0"
+            title="Import Schedule"
           >
-            <ClipboardPaste size={16} /> Import
+            <ClipboardPaste size={16} /> <span className="hidden md:inline">Import</span>
           </button>
 
-          {/* NEW: Overview Button */}
           <button 
             onClick={() => setActiveModal("overview")}
-            className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white px-3 py-2 rounded-lg font-bold text-sm transition-colors border border-zinc-700 hidden lg:flex"
+            className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white p-2.5 sm:px-3 sm:py-2 rounded-lg font-bold text-sm transition-colors border border-zinc-700 shrink-0"
             title="Week at a Glance"
           >
-            <Maximize size={16} /> Overview
+            <Maximize size={16} /> <span className="hidden lg:inline">Overview</span>
           </button>
 
-
-
-
-
-          <button onClick={handleAddClick} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow-lg shadow-red-500/20">
-            <Plus size={16} /> Add Course
+          <button onClick={handleAddClick} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white p-2.5 sm:px-4 sm:py-2 rounded-lg font-bold text-sm transition-colors shadow-lg shadow-red-500/20 shrink-0 whitespace-nowrap">
+            <Plus size={16} /> <span>Add Course</span>
           </button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg p-6 relative">
+      <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg relative">
         {classes.length === 0 ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-500">
             <LayoutGrid size={48} className="opacity-20 mb-4" />
@@ -169,74 +165,80 @@ function WeeklyGrid({ classes, onClassClick, isCompact }) {
   };
 
   return (
-    <div className="h-full flex flex-col animate-in fade-in duration-500">
-      <div className="flex border-b border-zinc-800 pb-2 mb-2 ml-14 sm:ml-16">
-        {DAYS.map((day) => (
-          <div key={day.name} className="flex-1 text-center text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{day.name}</div>
-        ))}
-      </div>
-      
-      <div className="flex-1 overflow-y-auto pb-4 custom-scrollbar">
-        <div className={`relative flex transition-all duration-500 ${isCompact ? "min-h-[450px]" : "min-h-[900px]"}`}>
+    // MOBILE FIX: Wrap the entire grid in a scrollable container
+    <div className="h-full relative animate-in fade-in duration-500">
+      <div className="absolute inset-0 overflow-auto custom-scrollbar bg-zinc-900 rounded-xl">
+        
+        {/* Enforce a minimum width. Below 800px, it activates the horizontal scroll! */}
+        <div className="min-w-[800px] min-h-full flex flex-col p-4 sm:p-6">
           
-        <div className="w-14 sm:w-16 flex flex-col justify-between text-[9px] sm:text-[10px] font-bold text-zinc-400 border-r border-zinc-800/50 pr-2 pt-2 pb-2 text-right shrink-0">
-          {PERIODS.map((time, i) => (
-            <span key={i} className="-mt-2 bg-zinc-900 z-10 whitespace-nowrap">{time}</span>
-          ))}
-        </div>
+          {/* Day Headers (Sticky Top) */}
+          <div className="flex border-b border-zinc-800 pb-2 mb-2 ml-14 sm:ml-16 sticky top-0 bg-zinc-900 z-30 pt-2">
+            {DAYS.map((day) => (
+              <div key={day.name} className="flex-1 text-center text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">{day.name}</div>
+            ))}
+          </div>
           
-          <div className="flex-1 flex relative min-w-[500px] sm:min-w-[600px]">
-            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-              {PERIODS.map((_, i) => (
-                <div key={i} className="w-full border-t border-zinc-800/30"></div>
+          {/* Grid Body */}
+          <div className={`relative flex flex-1 transition-all duration-500 ${isCompact ? "min-h-[450px]" : "min-h-[900px]"}`}>
+            
+            {/* Time Column (Sticky Left) */}
+            <div className="w-14 sm:w-16 flex flex-col justify-between text-[9px] sm:text-[10px] font-bold text-zinc-400 border-r border-zinc-800/50 pr-2 pt-2 pb-2 text-right shrink-0 sticky left-0 bg-zinc-900 z-20">
+              {PERIODS.map((time, i) => (
+                <span key={i} className="-mt-2 bg-zinc-900 z-10 whitespace-nowrap">{time}</span>
               ))}
             </div>
             
-            {DAYS.map((dayObj) => {
-              const rawDayClasses = classes.filter(c => c.days.includes(dayObj.index));
-              const processedClasses = processOverlaps(rawDayClasses);
-              return (
-                <div key={dayObj.name} className="flex-1 relative border-r border-zinc-800/20 last:border-0">
-                  {processedClasses.map(cls => {
-                    const startMins = getMinutesFromStart(cls.startTime);
-                    const duration = getMinutesFromStart(cls.endTime) - startMins;
-                    return (
-                      <div
-                        key={`${cls.id}-${dayObj.index}`}
-                        onClick={() => onClassClick(cls)} 
-                        // Adjusted gap to be slightly larger in comfortable mode
-                        className={`absolute rounded-md border overflow-hidden shadow-lg hover:z-20 transition-all hover:scale-[1.02] cursor-pointer group flex flex-col ${colorMap[cls.color] || colorMap.zinc} ${isCompact ? "p-1 gap-0.5" : "p-2 gap-1"}`}
-                        style={{
-                          top: `${(startMins / (TOTAL_HOURS * 60)) * 100}%`,
-                          height: `${(duration / (TOTAL_HOURS * 60)) * 100}%`,
-                          width: `calc(${cls._widthPercent}% - 4px)`,
-                          left: `calc(${cls._leftPercent}% + 2px)`
-                        }}
-                      >
-                        {/* Removed horizontal flex entirely. Elements are now stacked vertically. */}
-                        {/* Removed 'truncate' from the code so it never squishes */}
-                        <h4 className={`font-extrabold leading-none group-hover:text-white transition-colors break-words ${isCompact ? "text-[10px]" : "text-sm"}`}>
-                          {cls.code}
-                        </h4>
-                        
-                        <span className={`font-bold opacity-80 ${isCompact ? "text-[8px]" : "text-[10px]"}`}>
-                          {formatTimeUI(cls.startTime)} - {formatTimeUI(cls.endTime)}
-                        </span>
-                        
-                        {/* Dynamically stripping "Section: " from the UI string */}
-                        <p className={`opacity-90 leading-tight truncate ${isCompact ? "text-[8px] hidden lg:block" : "text-xs"}`}>
-                          {cls.title.replace("Section: ", "")}
-                        </p>
-                        
-                        <p className={`font-bold mt-auto bg-black/30 inline-block rounded w-max max-w-full truncate ${isCompact ? "text-[8px] px-1 py-0.5" : "text-[10px] px-1.5 py-1"}`}>
-                          {cls.room}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
+            {/* Canvas Area */}
+            <div className="flex-1 flex relative">
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                {PERIODS.map((_, i) => (
+                  <div key={i} className="w-full border-t border-zinc-800/30"></div>
+                ))}
+              </div>
+              
+              {DAYS.map((dayObj) => {
+                const rawDayClasses = classes.filter(c => c.days.includes(dayObj.index));
+                const processedClasses = processOverlaps(rawDayClasses);
+                return (
+                  <div key={dayObj.name} className="flex-1 relative border-r border-zinc-800/20 last:border-0">
+                    {processedClasses.map(cls => {
+                      const startMins = getMinutesFromStart(cls.startTime);
+                      const duration = getMinutesFromStart(cls.endTime) - startMins;
+                      return (
+                        <div
+                          key={`${cls.id}-${dayObj.index}`}
+                          onClick={() => onClassClick(cls)} 
+                          className={`absolute rounded-md border overflow-hidden shadow-lg hover:z-20 transition-all hover:scale-[1.02] cursor-pointer group flex flex-col ${colorMap[cls.color] || colorMap.zinc} ${isCompact ? "p-1 gap-0.5" : "p-2 gap-1"}`}
+                          style={{
+                            top: `${(startMins / (TOTAL_HOURS * 60)) * 100}%`,
+                            height: `${(duration / (TOTAL_HOURS * 60)) * 100}%`,
+                            width: `calc(${cls._widthPercent}% - 4px)`,
+                            left: `calc(${cls._leftPercent}% + 2px)`
+                          }}
+                        >
+                          <h4 className={`font-extrabold leading-none group-hover:text-white transition-colors break-words ${isCompact ? "text-[10px]" : "text-sm"}`}>
+                            {cls.code}
+                          </h4>
+                          
+                          <span className={`font-bold opacity-80 ${isCompact ? "text-[8px]" : "text-[10px]"}`}>
+                            {formatTimeUI(cls.startTime)} - {formatTimeUI(cls.endTime)}
+                          </span>
+                          
+                          <p className={`opacity-90 leading-tight truncate ${isCompact ? "text-[8px] hidden lg:block" : "text-xs"}`}>
+                            {cls.title.replace("Section: ", "")}
+                          </p>
+                          
+                          <p className={`font-bold mt-auto bg-black/30 inline-block rounded w-max max-w-full truncate ${isCompact ? "text-[8px] px-1 py-0.5" : "text-[10px] px-1.5 py-1"}`}>
+                            {cls.room}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -288,7 +290,7 @@ function DailyStack({ classes, onClassClick }) {
     });
 
   return (
-    <div className="h-full flex flex-col animate-in fade-in duration-500">
+    <div className="h-full flex flex-col animate-in fade-in duration-500 p-4 sm:p-6">
       <div className="flex gap-2 overflow-x-auto pb-4 mb-4 border-b border-zinc-800 custom-scrollbar shrink-0">
         {DAYS.map((day) => {
           const isSelected = selectedDay === day.index;
@@ -327,7 +329,6 @@ function DailyStack({ classes, onClassClick }) {
                   <Clock size={14} />
                   <span>{formatTimeUI(cls.startTime)} - {formatTimeUI(cls.endTime)}</span>
                 </div>
-                {/* Course Details */}
                 <div>
                   <h4 className="font-extrabold text-lg text-white group-hover:text-red-400 transition-colors leading-tight">
                     {cls.code}
