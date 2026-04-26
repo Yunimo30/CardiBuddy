@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* Add a dark background base for the whole app */
+body {
+  @apply bg-zinc-950 text-zinc-50 m-0 p-0;
+}
+
+
+/* --- GLOBAL CUSTOM SCROLLBAR --- */
+/* This automatically applies to the whole page and all scrollable divs */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #18181b; /* zinc-900 */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #52525b; /* zinc-600 */
+  border-radius: 8px;
+  border: 2px solid #18181b; /* Creates a premium padded look */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #71717a; /* zinc-500 */
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #52525b #18181b;
+}
