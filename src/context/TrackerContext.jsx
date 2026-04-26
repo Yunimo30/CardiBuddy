@@ -107,35 +107,9 @@ export function TrackerProvider({ children }) {
     const savedClasses = localStorage.getItem('cardiBuddy_classes');
     if (savedClasses) {
       setClasses(JSON.parse(savedClasses));
-    } else {
-      // Injecting dummy data so we can build the UI immediately
-      const initialClasses = [
-        { 
-          id: 'c1', 
-          code: 'CSS155', 
-          title: 'Data Engineering', 
-          room: 'Lab 201', 
-          type: 'F2F', // F2F, Online, or Alternating
-          days: [1, 4], // 0=Sun, 1=Mon, 2=Tue...
-          startTime: '09:00', // 24hr format is mathematically easier to render
-          endTime: '10:30',
-          color: 'blue' // To make the grid look beautiful
-        },
-        { 
-          id: 'c2', 
-          code: 'AIML101', 
-          title: 'Machine Learning Models', 
-          room: 'Zoom / Lab A', 
-          type: 'Alternating', 
-          days: [2, 5], 
-          startTime: '13:00', 
-          endTime: '15:30',
-          color: 'emerald'
-        }
-      ];
-      setClasses(initialClasses);
-      localStorage.setItem('cardiBuddy_classes', JSON.stringify(initialClasses));
     }
+    // Purged the 'else' block containing the mock Mapua data.
+    // New users will now see the beautiful empty states we built!
   }, []);
 
   const saveClass = (newClass) => {
