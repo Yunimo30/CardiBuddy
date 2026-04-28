@@ -3,20 +3,10 @@ import { createContext, useState, useContext, useEffect } from 'react';
 const TrackerContext = createContext();
 
 export function TrackerProvider({ children }) {
-  const currentRealWeek = 3; 
-  const [selectedWeek, setSelectedWeek] = useState(currentRealWeek);
-  
-  // State to hold user's manual modality overrides
-  const [modalityOverrides, setModalityOverrides] = useState({});
-
-  // --- CALENDAR EVENTS LOGIC ---
-  const [calendarEvents, setCalendarEvents] = useState({});
-
   const termConfig = {
     termName: "3rd Trimester AY 2025-2026",
     totalWeeks: 14,
     finalsWeek: 13,
-    // Add exact dates for the math engine
     startDate: new Date("2026-04-06T00:00:00"),
     endDate: new Date("2026-07-11T23:59:59"), 
     holidays: [
@@ -26,20 +16,60 @@ export function TrackerProvider({ children }) {
     ]
   };
 
-  // Load saved modalities from LocalStorage when the app starts
-  useEffect(() => {
-    const saved = localStorage.getItem('cardiBuddy_modalities');
-    if (saved) {
-      setModalityOverrides(JSON.parse(saved));
-    }
-  }, []);
+  // --- DYNAMIC CURRENT WEEK ENGINE ---
+  const calculateCurrentWeek = () => {
+    const now = new Date();
+    const start = termConfig.startDate;
+    const end = termConfig.endDate;
+
+    if (now < start) return 1; 
+    if (now > end) return termConfig.totalWeeks; 
+
+    const diffInTime = now.getTime() - start.getTime();
+    const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+    
+    return Math.floor(diffInDays / 7) + 1;
+  };
+
+  const currentRealWeek = calculateCurrentWeek();
+  const [selectedWeek, setSelectedWeek] = useState(currentRealWeek);
+
+// --- UI PREFERENCES LOGIC ---
+  const [sidebarMode, setSidebarMode] = useState(() => {
+    const saved = localStorage.getItem('cardiBuddy_sidebarMode');
+    return saved ? JSON.parse(saved) : 'auto'; 
+  });
+
+  // NEW: Direct setter function instead of a cycle
+  const changeSidebarMode = (newMode) => {
+    setSidebarMode(newMode);
+    localStorage.setItem('cardiBuddy_sidebarMode', JSON.stringify(newMode));
+  };
+
+
+  const cycleSidebarMode = () => {
+    setSidebarMode(prev => {
+      // The Cycle: Auto -> Expanded -> Collapsed -> Auto
+      const nextMode = prev === 'auto' ? 'expanded' : prev === 'expanded' ? 'collapsed' : 'auto';
+      localStorage.setItem('cardiBuddy_sidebarMode', JSON.stringify(nextMode));
+      return nextMode;
+    });
+  };
+
+  // --- MODALITY & EVENTS LOGIC ---
+  const [modalityOverrides, setModalityOverrides] = useState({});
+  const [calendarEvents, setCalendarEvents] = useState({});
 
   useEffect(() => {
+    const savedModalities = localStorage.getItem('cardiBuddy_modalities');
+    if (savedModalities) {
+      setModalityOverrides(JSON.parse(savedModalities));
+    }
+
     const savedEvents = localStorage.getItem('cardiBuddy_events');
     if (savedEvents) {
       try {
         const parsed = JSON.parse(savedEvents);
-        // Migration: Convert old plain-text arrays into object arrays
         const migrated = {};
         for (const date in parsed) {
           migrated[date] = parsed[date].map((ev, idx) => 
@@ -55,23 +85,18 @@ export function TrackerProvider({ children }) {
     }
   }, []);
 
-  // Function to toggle and save the modality for a specific week
   const toggleModality = (weekNumber) => {
     setModalityOverrides(prev => {
-      // If it's currently F2F (default/undefined), make it Online. Otherwise, revert to F2F.
       const currentModality = prev[weekNumber] || "F2F";
       const newModality = currentModality === "F2F" ? "Online" : "F2F";
-      
       const newState = { ...prev, [weekNumber]: newModality };
       localStorage.setItem('cardiBuddy_modalities', JSON.stringify(newState));
       return newState;
     });
   };
 
-  // Helper to get the modality for any week (Defaults to F2F)
   const getModalityForWeek = (weekNumber) => {
     return modalityOverrides[weekNumber] || "F2F";
-    
   };
 
   const addEvent = (dateString, eventText) => {
@@ -100,7 +125,7 @@ export function TrackerProvider({ children }) {
     });
   };
 
-// --- SCHEDULE LOGIC ---
+  // --- SCHEDULE LOGIC ---
   const [classes, setClasses] = useState([]);
 
   useEffect(() => {
@@ -108,8 +133,6 @@ export function TrackerProvider({ children }) {
     if (savedClasses) {
       setClasses(JSON.parse(savedClasses));
     }
-    // Purged the 'else' block containing the mock Mapua data.
-    // New users will now see the beautiful empty states we built!
   }, []);
 
   const saveClass = (newClass) => {
@@ -128,7 +151,6 @@ export function TrackerProvider({ children }) {
     });
   };
 
-
   const deleteClass = (id) => {
     setClasses(prev => {
       const newState = prev.filter(c => c.id !== id);
@@ -137,13 +159,14 @@ export function TrackerProvider({ children }) {
     });
   };
 
-
   return (
     <TrackerContext.Provider value={{ 
         selectedWeek, 
         setSelectedWeek, 
         currentRealWeek, 
         termConfig,
+        changeSidebarMode,
+        sidebarMode,
         getModalityForWeek,
         toggleModality,
         calendarEvents,
